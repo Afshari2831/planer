@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>برنامه‌ریز هفتگی</title>
+<style>
+:root{--bg:#f1f4f7;--card:#fff;--tx:#12263a;--mut:#76859a;--ac:#0b7a75;--bd:#dde3ea;--tab:#e4e9ef;--dg:#c0392b}
+@media (prefers-color-scheme:dark){:root{--bg:#0e1620;--card:#172230;--tx:#e6ecf3;--mut:#8b9bb0;--ac:#35c2ba;--bd:#26374a;--tab:#1e2c3d;--dg:#ff7b6b}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--tx);font-family:Vazirmatn,"IRANSans",Tahoma,system-ui,sans-serif}
+.w{max-width:600px;margin:0 auto;padding:14px 14px 40px}
+header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+h1{font-size:20px;margin:0;flex:1}
+h1 input{width:100%;font-size:20px}
+input,textarea,button{font:inherit;color:var(--tx)}
+input[type=text],input:not([type]),textarea{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:9px 10px}
+.b{background:var(--ac);color:#fff;border:0;border-radius:10px;padding:9px 14px;font-size:14px}
+.b.g{background:var(--tab);color:var(--tx)}
+.b.dl{background:transparent;color:var(--dg);border:1px solid var(--dg)}
+.ov{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--mut);margin-bottom:12px}
+.bar{height:8px;background:var(--tab);border-radius:6px;overflow:hidden;flex:1}
+.bar i{display:block;height:100%;background:var(--ac);transition:width .25s}
+#tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px}
+.tab{flex:0 0 auto;border:0;background:var(--tab);padding:9px 14px;border-radius:12px;font-size:14px}
+.tab.on{background:var(--ac);color:#fff}
+.tab.ok:not(.on){box-shadow:inset 0 -3px 0 var(--ac)}
+.cnt{font-size:12px;color:var(--mut);margin:4px 0 8px}
+.it{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:13px;margin-bottom:8px}
+.it input[type=checkbox]{width:22px;height:22px;accent-color:var(--ac);margin:0;flex:none}
+.it .t{font-size:12px;color:var(--mut);min-width:70px;flex:none}
+.it .x{flex:1;font-size:15px}
+.it.d .x{text-decoration:line-through;color:var(--mut)}
+.it.e{padding:8px;gap:6px}
+.it.e .ti{width:78px;flex:none}.it.e .tx{flex:1;min-width:0}
+.it.e button{border:1px solid var(--bd);background:var(--tab);border-radius:8px;width:32px;height:36px;flex:none}
+.row,.add{display:flex;gap:8px;margin:8px 0;flex-wrap:wrap;align-items:center}
+.row input{flex:1}.add input[type=text],.add input:not([type]){flex:1 1 120px}
+.all{font-size:13px;color:var(--mut)}
+textarea{width:100%;min-height:70px;margin-top:10px}
+.em{color:var(--mut);font-size:14px;text-align:center;padding:20px 0}
+footer{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.note{font-size:12px;color:var(--mut);margin-top:14px;line-height:1.9}
+#pr{display:none}
+@media print{.w{display:none}#pr{display:block;columns:2;font-size:12px}.pd{break-inside:avoid;margin-bottom:12px}}
+</style>
+</head>
+<body>
+<div class="w">
+<header><h1 id="ttl"></h1><button class="b g" id="bed">ویرایش</button></header>
+<div class="ov"><div class="bar"><i id="ob"></i></div><span id="ot"></span></div>
+<nav id="tabs"></nav>
+<section id="main"></section>
+<footer>
+<button class="b g" id="bnew">هفتهٔ جدید</button>
+<button class="b g" id="bex">ذخیرهٔ پشتیبان</button>
+<button class="b g" id="bim">بازیابی پشتیبان</button>
+<button class="b g" id="bpr">چاپ</button>
+<button class="b dl" id="brs">برنامهٔ اولیه</button>
+</footer>
+<div class="note">همهٔ اطلاعات فقط روی همین دستگاه ذخیره می‌شود. گاهی پشتیبان بگیر تا با پاک‌شدن اطلاعات مرورگر چیزی از دست نرود.</div>
+</div>
+<input type="file" id="fi" accept=".json,application/json" hidden>
+<div id="pr"></div>
+<script>
+var KEY="planner-v1";
+function FA(n){return Number(n).toLocaleString("fa")}
+function $(i){return document.getElementById(i)}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;")}
+function mk(t,x){return{id:Math.random().toString(36).slice(2,9),t:t,x:x,d:0}}
+function seed(){
+var am=[["۰۷:۰۰","لمعه (نکاح)"],["۰۸:۱۵","پس‌مطالعه نکاح"],["۰۹:۱۵","اصول"],["۱۰:۱۵","مباحثه صبح"]],
+q=["۱۵ دقیقه","قرآن"],
+sm=[["۰۴:۴۵","پیش‌مطالعه صرف"]].concat(am),
+sa=[["۱۱:۰۰","قواعد فقهیه"],["۱۳:۳۰","پس‌مطالعه اصول"],["۱۴:۳۰","لمعه (میراث)"],["۱۵:۳۰","مباحثه عصر"],["۱۶:۴۵","مباحثه تجزیه و ترکیب"],["۱۹:۳۰","۱ ساعت میراث + پیش‌مطالعه فردا"]],
+sb=[["۱۳:۳۰","لمعه (میراث) تا ۱۴:۱۵"],["۱۴:۳۰","پس‌مطالعه میراث"],["۱۵:۳۰","مباحثه"],["۱۶:۱۵","صرف (تا ۱۶:۵۵)"],["۱۶:۵۵","مباحثه تجزیه و ترکیب"]],
+D=[am.concat(sa),
+sm.concat([["۱۱:۰۰","پس‌مطالعه اصول"]],sb,[["۱۹:۳۰","پیش‌مطالعه متمرکز دروس"]]),
+am.concat(sa),
+sm.concat([["۱۱:۰۰","قواعد فقهیه"]],sb,[["۱۹:۳۰","۱ ساعت اصول + پیش‌مطالعه فردا"]]),
+am.concat([["۱۱:۰۰","پس‌مطالعه اصول"],["۱۴:۳۰","لمعه (میراث)"],["۱۵:۳۰","مباحثه عصر"],["۱۶:۴۵","مباحثه تجزیه و ترکیب"],["۱۹:۳۰","جلسه هفتگی (رفت و برگشت)"]]),
+[["۰۷:۰۰","کلام"],["۰۸:۱۵","کلام (تا ۹:۰۰)"],["۰۹:۱۵","تکمله اصول"],["۱۰:۱۵","تکمله اصول"],["۱۱:۰۰","مباحثه (تا اذان)"],["اتوبوس","تفسیر نمونه سوره مائده"]],
+[["اتوبوس","پیش‌مطالعه متمرکز دروس شنبه"]]],
+N=["شنبه","یکشنبه","دوشنبه","سه‌شنبه","چهارشنبه","پنجشنبه","جمعه"];
+return{title:"برنامه هفتگی",days:D.map(function(a,i){return{n:N[i],note:"",items:a.concat([q]).map(function(r){return mk(r[0],r[1])})}})}
+}
+function load(){try{var r=localStorage.getItem(KEY);if(r){var o=JSON.parse(r);if(o&&o.days&&o.days.length)return o}}catch(e){}return seed()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+var S=load(),cur=(new Date().getDay()+1)%7,ed=false;
+
+function R(){
+if(cur>=S.days.length)cur=S.days.length-1;
+var tot=0,dn=0;
+S.days.forEach(function(d){d.items.forEach(function(i){tot++;if(i.d)dn++})});
+$("ttl").innerHTML=ed?'<input id="ti" value="'+esc(S.title)+'">':esc(S.title);
+$("bed").textContent=ed?"پایان ویرایش":"ویرایش";
+$("ob").style.width=(tot?dn/tot*100:0)+"%";
+$("ot").textContent=FA(dn)+" از "+FA(tot);
+var t="";
+S.days.forEach(function(d,i){
+var a=d.items.length,b=d.items.filter(function(x){return x.d}).length;
+t+='<button class="tab'+(i==cur?" on":"")+(a&&a==b?" ok":"")+'" data-i="'+i+'">'+esc(d.n)+'</button>'});
+if(ed)t+='<button class="tab" id="ad">+ روز</button>';
+$("tabs").innerHTML=t;
+var d=S.days[cur],n=d.items.length,k=d.items.filter(function(x){return x.d}).length,h="";
+h+='<div class="ov"><div class="bar"><i style="width:'+(n?k/n*100:0)+'%"></i></div><span>'+FA(k)+' از '+FA(n)+'</span></div>';
+if(ed)h+='<div class="row"><input id="dnm" value="'+esc(d.n)+'"><button class="b dl" id="dd">حذف این روز</button></div>';
+d.items.forEach(function(it,j){
+if(ed)h+='<div class="it e"><input class="ti" data-j="'+j+'" data-f="t" value="'+esc(it.t)+'"><input class="tx" data-j="'+j+'" data-f="x" value="'+esc(it.x)+'"><button data-a="up" data-j="'+j+'">▲</button><button data-a="dn" data-j="'+j+'">▼</button><button data-a="rm" data-j="'+j+'">✕</button></div>';
+else h+='<label class="it'+(it.d?" d":"")+'"><input type="checkbox" data-j="'+j+'"'+(it.d?" checked":"")+'><span class="t">'+esc(it.t)+'</span><span class="x">'+esc(it.x)+'</span></label>'});
+if(!n)h+='<p class="em">این روز کاری ندارد. «ویرایش» را بزن و کار اضافه کن.</p>';
+if(ed)h+='<div class="add"><input id="nt" placeholder="ساعت"><input id="nx" placeholder="عنوان کار"><label class="all"><input type="checkbox" id="na"> همهٔ روزها</label><button class="b" id="nb">افزودن کار</button></div>';
+h+='<textarea id="nn" placeholder="یادداشت این روز…">'+esc(d.note||"")+'</textarea>';
+$("main").innerHTML=h}
+
+$("tabs").onclick=function(e){
+var b=e.target.closest("button");if(!b)return;
+if(b.id=="ad"){S.days.push({n:"روز جدید",note:"",items:[]});cur=S.days.length-1;save()}
+else cur=+b.dataset.i;
+R()};
+$("main").onchange=function(e){
+var el=e.target;
+if(el.type=="checkbox"&&el.dataset.j!==undefined&&!ed){S.days[cur].items[+el.dataset.j].d=el.checked?1:0;save();R()}
+else if(el.id=="dnm"){S.days[cur].n=el.value||"روز";save();R()}};
+$("main").oninput=function(e){
+var el=e.target;
+if(el.dataset.f){S.days[cur].items[+el.dataset.j][el.dataset.f]=el.value;save()}
+else if(el.id=="nn"){S.days[cur].note=el.value;save()}};
+$("main").onclick=function(e){
+var b=e.target.closest("button");if(!b)return;
+var it=S.days[cur].items,j=+b.dataset.j,a=b.dataset.a;
+if(a=="rm")it.splice(j,1);
+else if(a=="up"&&j>0)it.splice(j-1,0,it.splice(j,1)[0]);
+else if(a=="dn"&&j<it.length-1)it.splice(j+1,0,it.splice(j,1)[0]);
+else if(b.id=="dd"){if(!confirm("این روز با همهٔ کارهایش حذف شود؟"))return;S.days.splice(cur,1);if(!S.days.length)S.days.push({n:"روز ۱",note:"",items:[]})}
+else if(b.id=="nb"){
+var x=$("nx").value.trim(),t=$("nt").value.trim();if(!x)return;
+if($("na").checked)S.days.forEach(function(d){d.items.push(mk(t,x))});else it.push(mk(t,x))}
+else return;
+save();R()};
+$("ttl").oninput=function(e){if(e.target.id=="ti"){S.title=e.target.value;save()}};
+$("bed").onclick=function(){ed=!ed;R()};
+$("bnew").onclick=function(){if(!confirm("همهٔ تیک‌ها پاک شود و هفتهٔ جدید شروع شود؟"))return;S.days.forEach(function(d){d.items.forEach(function(i){i.d=0})});save();R()};
+$("bex").onclick=function(){
+if(window.Android){Android.share(JSON.stringify(S));return}
+var a=document.createElement("a");
+a.href=URL.createObjectURL(new Blob([JSON.stringify(S)],{type:"application/json"}));
+a.download="planner-backup.json";document.body.appendChild(a);a.click();a.remove()};
+function imp(t){try{var o=JSON.parse(t);if(!o.days||!o.days.length)throw 0;S=o;save();R()}catch(e){alert("پشتیبان معتبر نیست.")}}
+$("bim").onclick=function(){if(window.Android){var t=prompt("متن پشتیبان را اینجا بچسبان");if(t)imp(t)}else $("fi").click()};
+$("fi").onchange=function(){
+var f=this.files[0];if(!f)return;
+var r=new FileReader();
+r.onload=function(){try{var o=JSON.parse(r.result);if(!o.days||!o.days.length)throw 0;S=o;save();R()}catch(e){alert("فایل پشتیبان معتبر نیست.")}};
+r.readAsText(f);this.value=""};
+$("bpr").onclick=function(){
+var h="<h2>"+esc(S.title)+"</h2>";
+S.days.forEach(function(d){h+='<div class="pd"><h3>'+esc(d.n)+'</h3>';d.items.forEach(function(i){h+="<div>"+(i.d?"☑ ":"☐ ")+esc(i.t)+" — "+esc(i.x)+"</div>"});h+="</div>"});
+$("pr").innerHTML=h;if(window.Android)Android.print();else window.print()};
+$("brs").onclick=function(){if(!confirm("برنامه به حالت اولیه برگردد؟ تغییرات شما پاک می‌شود."))return;S=seed();save();R()};
+R();
+</script>
+</body>
+</html>

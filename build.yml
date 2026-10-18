@@ -1,0 +1,195 @@
+name: Build APK
+on:
+  push:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+      - name: Create Android project
+        run: |
+          set -e
+          mkdir -p app/src/main/java/com/planner/app app/src/main/assets app/src/main/res/values app/src/main/res/drawable app/src/main/res/mipmap-anydpi-v26
+          cp index.html app/src/main/assets/index.html
+          echo "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" | base64 -d > app/planner.jks
+          cat > settings.gradle <<'EOF'
+          pluginManagement {
+              repositories { google(); mavenCentral(); gradlePluginPortal() }
+          }
+          dependencyResolutionManagement {
+              repositories { google(); mavenCentral() }
+          }
+          rootProject.name = "Planner"
+          include ':app'
+          EOF
+          cat > build.gradle <<'EOF'
+          plugins {
+              id 'com.android.application' version '8.5.2' apply false
+          }
+          EOF
+          cat > gradle.properties <<'EOF'
+          org.gradle.jvmargs=-Xmx2g
+          android.nonTransitiveRClass=true
+          EOF
+          cat > app/build.gradle <<'EOF'
+          plugins {
+              id 'com.android.application'
+          }
+          android {
+              namespace 'com.planner.app'
+              compileSdk 34
+              defaultConfig {
+                  applicationId 'com.planner.app'
+                  minSdk 26
+                  targetSdk 34
+                  versionCode (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInteger()
+                  versionName '1.0'
+              }
+              signingConfigs {
+                  release {
+                      storeFile file('planner.jks')
+                      storePassword 'planner123'
+                      keyAlias 'planner'
+                      keyPassword 'planner123'
+                  }
+              }
+              buildTypes {
+                  release {
+                      signingConfig signingConfigs.release
+                      minifyEnabled false
+                  }
+              }
+              compileOptions {
+                  sourceCompatibility JavaVersion.VERSION_17
+                  targetCompatibility JavaVersion.VERSION_17
+              }
+          }
+          EOF
+          cat > app/src/main/AndroidManifest.xml <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+              <application
+                  android:label="@string/app_name"
+                  android:icon="@mipmap/ic_launcher"
+                  android:roundIcon="@mipmap/ic_launcher"
+                  android:theme="@android:style/Theme.DeviceDefault.NoActionBar"
+                  android:allowBackup="true"
+                  android:supportsRtl="true">
+                  <activity
+                      android:name=".MainActivity"
+                      android:exported="true"
+                      android:windowSoftInputMode="adjustResize"
+                      android:configChanges="orientation|screenSize|keyboardHidden">
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN"/>
+                          <category android:name="android.intent.category.LAUNCHER"/>
+                      </intent-filter>
+                  </activity>
+              </application>
+          </manifest>
+          EOF
+          cat > app/src/main/java/com/planner/app/MainActivity.java <<'EOF'
+          package com.planner.app;
+
+          import android.app.Activity;
+          import android.content.Intent;
+          import android.os.Bundle;
+          import android.print.PrintManager;
+          import android.webkit.JavascriptInterface;
+          import android.webkit.WebChromeClient;
+          import android.webkit.WebSettings;
+          import android.webkit.WebView;
+          import android.webkit.WebViewClient;
+
+          public class MainActivity extends Activity {
+              private WebView web;
+
+              @Override
+              protected void onCreate(Bundle b) {
+                  super.onCreate(b);
+                  web = new WebView(this);
+                  setContentView(web);
+                  WebSettings s = web.getSettings();
+                  s.setJavaScriptEnabled(true);
+                  s.setDomStorageEnabled(true);
+                  web.addJavascriptInterface(new Bridge(), "Android");
+                  web.setWebViewClient(new WebViewClient());
+                  web.setWebChromeClient(new WebChromeClient());
+                  web.loadUrl("file:///android_asset/index.html");
+              }
+
+              private class Bridge {
+                  @JavascriptInterface
+                  public void share(final String t) {
+                      runOnUiThread(new Runnable() {
+                          public void run() {
+                              Intent i = new Intent(Intent.ACTION_SEND);
+                              i.setType("text/plain");
+                              i.putExtra(Intent.EXTRA_TEXT, t);
+                              startActivity(Intent.createChooser(i, "Backup"));
+                          }
+                      });
+                  }
+
+                  @JavascriptInterface
+                  public void print() {
+                      runOnUiThread(new Runnable() {
+                          public void run() {
+                              PrintManager pm = (PrintManager) getSystemService(PRINT_SERVICE);
+                              pm.print("planner", web.createPrintDocumentAdapter("planner"), null);
+                          }
+                      });
+                  }
+              }
+          }
+          EOF
+          cat > app/src/main/res/values/strings.xml <<'EOF'
+          <resources>
+              <string name="app_name">برنامه‌ریز هفتگی</string>
+          </resources>
+          EOF
+          cat > app/src/main/res/values/colors.xml <<'EOF'
+          <resources>
+              <color name="ic_bg">#0B7A75</color>
+          </resources>
+          EOF
+          cat > app/src/main/res/drawable/ic_fg.xml <<'EOF'
+          <vector xmlns:android="http://schemas.android.com/apk/res/android"
+              android:width="108dp" android:height="108dp"
+              android:viewportWidth="108" android:viewportHeight="108">
+              <path
+                  android:pathData="M34,56 L48,70 L76,40"
+                  android:strokeColor="#FFFFFF"
+                  android:strokeWidth="8"
+                  android:strokeLineCap="round"
+                  android:strokeLineJoin="round"
+                  android:fillColor="#00000000"/>
+          </vector>
+          EOF
+          cat > app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml <<'EOF'
+          <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+              <background android:drawable="@color/ic_bg"/>
+              <foreground android:drawable="@drawable/ic_fg"/>
+          </adaptive-icon>
+          EOF
+      - name: Build APK
+        run: gradle assembleRelease --no-daemon --stacktrace
+      - uses: actions/upload-artifact@v4
+        with:
+          name: planner-apk
+          path: app/build/outputs/apk/release/*.apk
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.run_number }}
+          name: Planner v${{ github.run_number }}
+          files: app/build/outputs/apk/release/*.apk
